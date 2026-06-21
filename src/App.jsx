@@ -1,28 +1,44 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
+import Landing from "./Landing";
 
-// Import lazy do microfrontend remoto
+// Imports lazy dos microfrontends remotos
 const LoginPage = lazy(() => import("mfe_auth/LoginPage"));
+const DashboardPage = lazy(() => import("mfe_auth/DashboardPage"));
+const CompetenciesPage = lazy(() => import("mfe_competency/CompetenciesPage"));
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
 }
 
-function Dashboard() {
+function logout(navigate) {
+  localStorage.clear();
+  navigate("/login", { replace: true });
+}
+
+function Home() {
+  const navigate = useNavigate();
+  return <Landing onLogout={() => logout(navigate)} />;
+}
+
+function Users() {
+  const navigate = useNavigate();
   return (
-    <div style={{ padding: 32, fontFamily: "sans-serif" }}>
-      <h1>Chave — Dashboard</h1>
-      <p>Bem-vindo ao sistema de gestão de estoque.</p>
-      <button
-        onClick={() => {
-          localStorage.clear();
-          window.location.href = "/login";
-        }}
-      >
-        Sair
-      </button>
-    </div>
+    <DashboardPage onLogout={() => logout(navigate)} onHome={() => navigate("/")} />
+  );
+}
+
+function Competencies() {
+  const navigate = useNavigate();
+  return (
+    <CompetenciesPage onLogout={() => logout(navigate)} onHome={() => navigate("/")} />
   );
 }
 
@@ -33,17 +49,29 @@ export default function App() {
         <Routes>
           <Route
             path="/login"
-            element={
-              <LoginPage
-                onLogin={() => (window.location.href = "/")}
-              />
-            }
+            element={<LoginPage onLogin={() => (window.location.href = "/")} />}
           />
           <Route
             path="/"
             element={
               <PrivateRoute>
-                <Dashboard />
+                <Home />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/usuarios"
+            element={
+              <PrivateRoute>
+                <Users />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/competencias"
+            element={
+              <PrivateRoute>
+                <Competencies />
               </PrivateRoute>
             }
           />

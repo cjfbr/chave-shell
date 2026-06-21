@@ -10,6 +10,7 @@ import Landing from "./Landing";
 
 // Imports lazy dos microfrontends remotos
 const LoginPage = lazy(() => import("mfe_auth/LoginPage"));
+const SignUpPage = lazy(() => import("mfe_auth/SignUpPage"));
 const DashboardPage = lazy(() => import("mfe_auth/DashboardPage"));
 const CompetenciesPage = lazy(() => import("mfe_competency/CompetenciesPage"));
 
@@ -21,6 +22,26 @@ function PrivateRoute({ children }) {
 function logout(navigate) {
   localStorage.clear();
   navigate("/login", { replace: true });
+}
+
+function Login() {
+  const navigate = useNavigate();
+  return (
+    <LoginPage
+      onLogin={() => (window.location.href = "/")}
+      onGoToSignUp={() => navigate("/cadastro")}
+    />
+  );
+}
+
+function SignUp() {
+  const navigate = useNavigate();
+  return (
+    <SignUpPage
+      onSignUp={() => navigate("/login", { replace: true })}
+      onGoToLogin={() => navigate("/login")}
+    />
+  );
 }
 
 function Home() {
@@ -49,7 +70,11 @@ export default function App() {
         <Routes>
           <Route
             path="/login"
-            element={<LoginPage onLogin={() => (window.location.href = "/")} />}
+            element={<Login />}
+          />
+          <Route
+            path="/cadastro"
+            element={<SignUp />}
           />
           <Route
             path="/"
